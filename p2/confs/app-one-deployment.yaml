@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-one-deployment
+  namespace: apps
+  labels:
+    app: app-one
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-one
+  template:
+    metadata:
+      labels:
+        app: app-one
+    spec:
+      containers:
+      - name: app-one
+        image: olisyma/goapp
+        env:
+        - name: APP_NAME
+          value: "APP 1"
+        ports:
+        - containerPort: 80

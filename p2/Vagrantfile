@@ -1,0 +1,43 @@
+# K3s cluster with master and agent nodes
+vagrant_provider = "virtualbox"
+vagrant_box = "generic/debian12"
+# vagrant_box = "boxomatic/alpine-3.19"
+
+vbox_network = "private_network"
+
+server_ip = "192.168.56.110"
+server_vmname = "psimonen"
+server_hostname = "psimonenS"
+server_cpu = 1
+server_ram = 1024
+
+token_path = "/vagrant_share/token"
+
+Vagrant.configure(2) do |config|
+    config.vm.box = vagrant_box
+
+    config.vm.define server_vmname do |server|
+        server.vm.provider vagrant_provider do |v|
+            v.memory = server_ram
+            v.cpus = server_cpu
+        end
+        server.vm.hostname = server_hostname
+        server.vm.network vbox_network, ip: server_ip, hostname: true
+        server.vm.synced_folder "./confs", "/vagrant_share"
+        server.vm.provision "shell", inline: <<-SHELL
+            echo 'k3s server'
+            export INSTALL_K3S_EXEC="--bind-address #{server_ip} --flannel-iface eth1"
+            curl -sfL https://get.k3s.io | sh -
+            sleep 5
+            cp /etc/rancher/k3s/k3s.yaml /vagrant_share/
+            sudo kubectl apply -f /vagrant_share/namespace.yaml
+            sudo kubectl apply -f /vagrant_share/app-one-service.yaml
+            sudo kubectl apply -f /vagrant_share/app-one-deployment.yaml
+            sudo kubectl apply -f /vagrant_share/app-two-service.yaml
+            sudo kubectl apply -f /vagrant_share/app-two-deployment.yaml
+            sudo kubectl apply -f /vagrant_share/app-three-service.yaml
+            sudo kubectl apply -f /vagrant_share/app-three-deployment.yaml
+            sudo kubectl apply -f /vagrant_share/ingress.yaml
+            SHELL
+    end
+end

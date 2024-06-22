@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-three-deployment
+  namespace: apps
+  labels:
+    app: app-three
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: app-three
+  template:
+    metadata:
+      labels:
+        app: app-three
+    spec:
+      containers:
+      - name: app-three
+        image: olisyma/goapp
+        env:
+        - name: APP_NAME
+          value: "APP 3"
+        ports:
+        - containerPort: 80
