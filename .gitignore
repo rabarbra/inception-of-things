@@ -1,2 +1,4 @@
 .vagrant
 */.vagrant
+k3s.yaml
+token
