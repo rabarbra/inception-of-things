@@ -1,5 +1,7 @@
 # K3s cluster with master and agent nodes
+vagrant_provider = "virtualbox"
 vagrant_box = "generic/debian12"
+# vagrant_box = "boxomatic/alpine-3.19"
 
 server_ip = "192.168.56.110"
 server_vmname = "psimonen"
@@ -19,7 +21,7 @@ Vagrant.configure(2) do |config|
     config.vm.box = vagrant_box
 
     config.vm.define server_vmname do |server|
-        server.vm.provider "virtualbox" do |v|
+        server.vm.provider vagrant_provider do |v|
             v.memory = server_ram
             v.cpus = server_cpu
         end
@@ -37,7 +39,7 @@ Vagrant.configure(2) do |config|
     end
 
     config.vm.define agent_vmname do |agent|
-        agent.vm.provider "virtualbox" do |v|
+        agent.vm.provider vagrant_provider do |v|
             v.memory = agent_ram
             v.cpus = agent_cpu
         end
