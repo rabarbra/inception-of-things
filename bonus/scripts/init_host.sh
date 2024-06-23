@@ -3,7 +3,7 @@
 # Configuration
 cluster_name="gitlab"
 certs_email="psimonen@student.42wolfsburg.de"
-gitlab_domain="localhost"
+gitlab_domain="app.com"
 
 # Colors
 GREEN="\e[32m"
@@ -44,7 +44,7 @@ fi
 if ! k3d cluster list $cluster_name &> /dev/null
 then
     echo -e "${GREEN}Creating cluster${ENDCOLOR}"
-    k3d cluster create $cluster_name -a 3 --agents-memory 512M --k3s-arg --disable=traefik@server:0 --k3s-arg --disable=traefik@agent:0,1,2 
+    k3d cluster create $cluster_name --k3s-arg '--disable=traefik@server:0' --servers-memory 4000M
 fi
 echo -e "${GREEN}Cluster nodes:${ENDCOLOR}"
 kubectl get nodes
@@ -59,8 +59,6 @@ fi
 sleep 5
 # Install Gitlab
 echo -e "${GREEN}Installing GitLab${ENDCOLOR}"
-kubectl rollout status deployment traefik -n kube-system
-EXTERNAL_IP=$(kubectl get svc/traefik -n kube-system | awk '{print $4}' | tail -1)
 kubectl create namespace gitlab
 helm repo add gitlab https://charts.gitlab.io/
 helm repo update
@@ -68,11 +66,31 @@ helm upgrade --install gitlab gitlab/gitlab \
   --namespace gitlab \
   --timeout 600s \
   --set global.hosts.domain=$gitlab_domain \
-  --set global.hosts.externalIP=$EXTERNAL_IP \
   --set certmanager-issuer.email=$certs_email \
   --set certmnager.install=false \
+  --set prometheus.install=false \
+  --set gitlab-runner.install=false \
   --set global.ingress.configureCertmanager=false \
-  --set gitlab-runner.install=false
+  --set global.rails.bootsnap.enabled=false \
+  --set global.registry.enabled=false \
+  --set global.kas.enabled=false \
+  --set gitlab.webservice.minReplicas=1 \
+  --set gitlab.webservice.maxReplicas=1 \
+  --set gitlab.webservice.workerProcesses=0 \
+  --set gitlab.webservice.resources.requests.memory=1000M \
+  --set gitlab.kas.minReplicas=1 \
+  --set gitlab.kas.maxReplicas=1 \
+  --set gitlab.gitlab-exporter.enabled=false \
+  --set gitlab.toolbox.enabled=false \
+  --set gitlab.sidekiq.enabled=false \
+  --set gitlab.sidekiq.minReplicas=1 \
+  --set gitlab.sidekiq.maxReplicas=1 \
+  --set gitlab.sidekiq.resources.requests.memory=300M \
+  --set gitlab.sidekiq.resources.requests.cpu=60m \
+  --set gitlab.gitlab-shell.minReplicas=1 \
+  --set gitlab.gitlab-shell.maxReplicas=1 \
+  --set registry.hpa.minReplicas=1 \
+  --set registry.hpa.maxReplicas=1
 # kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
 # # Install Argo CD
