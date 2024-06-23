@@ -72,7 +72,6 @@ helm upgrade --install gitlab gitlab/gitlab \
   --set gitlab-runner.install=false \
   --set global.ingress.configureCertmanager=false \
   --set global.rails.bootsnap.enabled=false \
-  --set global.registry.enabled=false \
   --set global.kas.enabled=false \
   --set gitlab.webservice.minReplicas=1 \
   --set gitlab.webservice.maxReplicas=1 \
