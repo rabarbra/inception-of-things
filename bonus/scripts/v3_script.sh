@@ -2,7 +2,7 @@
 
 # Configuration
 cluster_name="gitlab"
-app_repo="https://gitlab.app.com/root/test.git"
+app_repo="git@gitlab-gitlab-shell.gitlab.svc.cluster.local:root/test.git"
 app_path="app/"
 app_name="iot-p3-app"
 app_namespace="dev"
@@ -12,51 +12,6 @@ GREEN="\e[32m"
 ENDCOLOR="\e[0m"
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
-
-# Install Docker
-if ! command -v docker &> /dev/null
-then
-    echo -e "${GREEN}Installing docker${ENDCOLOR}"
-    sudo dnf install dnf-plugins-core
-    sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
-    sudo dnf install docker-ce docker-ce-cli containerd.io
-    sudo groupadd -f docker
-    sudo usermod -aG docker ${USER}
-    sudo systemctl enable docker
-    sudo systemctl start docker
-fi
-
-# Install kubectl
-if ! command -v kubectl &> /dev/null
-then
-    echo -e "${GREEN}Installing kubectl${ENDCOLOR}"
-    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-    sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-    rm kubectl
-fi
-
-# Install k3d
-if ! command -v k3d &> /dev/null
-then
-    echo -e "${GREEN}Installing k3d${ENDCOLOR}"
-    curl -s https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
-fi
-
-# Create cluster
-if ! k3d cluster list $cluster_name &> /dev/null
-then
-    echo -e "${GREEN}Creating cluster${ENDCOLOR}"
-    k3d cluster create $cluster_name
-fi
-echo -e "${GREEN}Cluster nodes:${ENDCOLOR}"
-kubectl get nodes
-
-# Install Helm
-if ! command -v helm &> /dev/null
-then
-    echo -e "${GREEN}Installing Helm${ENDCOLOR}"
-    sudo dnf install helm
-fi
 
 # Install Argo CD
 echo -e "${GREEN}Installing Argo CD${ENDCOLOR}"
@@ -92,7 +47,7 @@ argocd login localhost:7845 --insecure \
     --username admin \
     --password $(kubectl get secret argocd-initial-admin-secret --namespace=argocd --template={{.data.password}} | base64 -d)
 kubectl create namespace $app_namespace
-argocd repo add $app_repo --insecure-skip-server-verification
+argocd repo add $app_repo --insecure-skip-server-verification --ssh-private-key-path ~/.ssh/id_rsa
 argocd app create $app_name \
     --repo $app_repo \
     --path $app_path \

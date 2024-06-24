@@ -4,7 +4,7 @@
 cluster_name="gitlab"
 certs_email="psimonen@student.42wolfsburg.de"
 gitlab_domain="app.com"
-gitlab_ip="172.26.0.3"
+gitlab_ip="172.29.0.2"
 
 # Colors
 GREEN="\e[32m"
@@ -74,11 +74,11 @@ helm upgrade --install gitlab gitlab/gitlab \
   --set gitlab-runner.install=false \
   --set global.ingress.configureCertmanager=false \
   --set global.rails.bootsnap.enabled=false \
-  --set global.kas.enabled=false \
   --set gitlab.webservice.minReplicas=1 \
   --set gitlab.webservice.maxReplicas=1 \
   --set gitlab.webservice.workerProcesses=0 \
   --set gitlab.webservice.resources.requests.memory=600M \
+  --set global.kas.enabled=false \
   --set gitlab.kas.minReplicas=1 \
   --set gitlab.kas.maxReplicas=1 \
   --set gitlab.gitlab-exporter.enabled=false \
@@ -92,30 +92,5 @@ helm upgrade --install gitlab gitlab/gitlab \
   --set gitlab.gitlab-shell.maxReplicas=1 \
   --set registry.hpa.minReplicas=1 \
   --set registry.hpa.maxReplicas=1
-# kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-
-# # Install Argo CD
-# echo -e "${GREEN}Installing Argo CD${ENDCOLOR}"
-# kubectl create namespace argocd
-# helm repo add argocd https://argoproj.github.io/argo-helm
-# helm install argocd argocd/argo-cd \
-#     --namespace argocd \
-#     --set configs.cm."timeout\.reconciliation"=20s
-# # kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-
-# # Install Argo CD CLI
-# if ! command -v argocd &> /dev/null
-# then
-#     echo -e "${GREEN}Installing Argo CD CLI${ENDCOLOR}"
-#     curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
-#     sudo install -m 555 argocd-linux-amd64 /usr/local/bin/argocd
-#     rm argocd-linux-amd64
-# fi
-
-# # Waiting for argocd to be ready
-# kubectl rollout status deployment argocd-server -n argocd
-# kubectl rollout status deployment argocd-repo-server -n argocd
-# kubectl rollout status deployment argocd-dex-server -n argocd
-# kubectl rollout status deployment argocd-applicationset-controller -n argocd
 
 echo -e "${GREEN}DONE!${ENDCOLOR}"
