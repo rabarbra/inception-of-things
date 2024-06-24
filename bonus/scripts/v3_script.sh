@@ -20,7 +20,6 @@ helm repo add argocd https://argoproj.github.io/argo-helm
 helm install argocd argocd/argo-cd \
     --namespace argocd \
     --set configs.cm."timeout\.reconciliation"=20s
-# kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
 # Install Argo CD CLI
 if ! command -v argocd &> /dev/null
