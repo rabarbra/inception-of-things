@@ -4,6 +4,7 @@
 cluster_name="gitlab"
 certs_email="psimonen@student.42wolfsburg.de"
 gitlab_domain="app.com"
+gitlab_ip="172.26.0.3"
 
 # Colors
 GREEN="\e[32m"
@@ -66,6 +67,7 @@ helm upgrade --install gitlab gitlab/gitlab \
   --namespace gitlab \
   --timeout 600s \
   --set global.hosts.domain=$gitlab_domain \
+  --set global.hosts.externalIP=$gitlab_ip \
   --set certmanager-issuer.email=$certs_email \
   --set certmnager.install=false \
   --set prometheus.install=false \
@@ -76,7 +78,7 @@ helm upgrade --install gitlab gitlab/gitlab \
   --set gitlab.webservice.minReplicas=1 \
   --set gitlab.webservice.maxReplicas=1 \
   --set gitlab.webservice.workerProcesses=0 \
-  --set gitlab.webservice.resources.requests.memory=1000M \
+  --set gitlab.webservice.resources.requests.memory=600M \
   --set gitlab.kas.minReplicas=1 \
   --set gitlab.kas.maxReplicas=1 \
   --set gitlab.gitlab-exporter.enabled=false \
