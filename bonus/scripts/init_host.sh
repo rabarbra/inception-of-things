@@ -57,7 +57,6 @@ then
     sudo dnf install helm
 fi
 
-sleep 5
 # Install Gitlab
 echo -e "${GREEN}Installing GitLab${ENDCOLOR}"
 kubectl create namespace gitlab
